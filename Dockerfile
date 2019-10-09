@@ -7,6 +7,14 @@ RUN printf "deb http://archive.debian.org/debian/ wheezy main non-free contrib\n
 RUN apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y wget build-essential vim git
 
 RUN cd /tmp \
+    && wget --no-check-certificate http://www.openssl.org/source/openssl-0.9.8x.tar.gz \
+    && tar xvfz openssl-0.9.8x.tar.gz \
+    && cd openssl-0.9.8x \
+    && ./config shared --prefix=/usr/local/openssl-0.9.8 \
+    && make \
+    && make install
+
+RUN cd /tmp \
     && wget --no-check-certificate https://museum.php.net/php5/php-5.0.5.tar.gz \
     && tar xzf php-5.0.5.tar.gz
 
@@ -16,7 +24,7 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/ \
     && ln -s /usr/lib/x86_64-linux-gnu/libexpat.so /usr/lib/ \
     && ln -s /usr/lib/x86_64-linux-gnu/libmysqlclient.so /usr/lib/libmysqlclient.so \
     && mkdir /usr/kerberos \
-    && ln -s /usr/lib/x86_64-linux-gnu /usr/kerberos/lib
+    && ln -s /usr/lib/x86_64-linux-gnu/mit-krb5 /usr/kerberos/lib
 
 RUN apt-get build-dep -y php5
 
@@ -35,7 +43,6 @@ RUN cd /tmp/php-5.0.5/ \
        --with-zlib \
        --with-gd \
        --with-pgsql \
-       --disable-rpath \
        --enable-inline-optimization \
        --with-bz2 \
        --with-zlib \
@@ -52,7 +59,8 @@ RUN cd /tmp/php-5.0.5/ \
        --with-jpeg-dir=/usr \
        --with-png-dir=/usr \
        --enable-gd-native-ttf \
-       --with-libdir=/lib/x86_64-linux-gnu \
+       --with-openssl=/usr/local/openssl-0.9.8 \
+       --with-openssl-dir=/usr/local/openssl-0.9.8 \
        --enable-ftp \
        --with-kerberos \
        --with-gettext \
